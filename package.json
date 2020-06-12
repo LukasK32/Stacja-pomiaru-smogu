@@ -1,0 +1,33 @@
+{
+  "name": "stacja-pomiaru-smogu",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "setup": "node setup.js",
+    "start": "node index.js"
+  },
+  "author": {
+    "name": "Lukas Kirylak",
+    "email": "contact@lukask.pro",
+    "url": "https://lukask.pro"
+  },
+  "contributors": [
+    {
+      "name": "Aleksander Jabłoński",
+      "email": "aleksander.jablonski@indevops.com",
+      "url": "https://ajablonski.pro"
+    }
+  ],
+  "dependencies": {
+    "axios": "^0.19.2",
+    "chalk": "^4.0.0",
+    "dotenv": "^8.2.0",
+    "inquirer": "^7.1.0",
+    "serialport": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
