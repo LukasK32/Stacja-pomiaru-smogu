@@ -1,6 +1,7 @@
 const SerialPort = require('serialport');
 const chalk = require('chalk');
 const vROps = require('./vrops');
+const bme280 = require('bme280');
 
 // Load variables from .env file
 require('dotenv').config();
@@ -31,6 +32,10 @@ function readPMS(buff) {
     return Data;
 }
 
+async function readBME(sensor) {
+    return await sensor.read();
+}
+
 async function main() {
 
     console.log(chalk.green('Initialization...'));
@@ -51,7 +56,11 @@ async function main() {
     let combinedData = [];
 
     const PMS = new SerialPort('/dev/ttyUSB0', {
-        baudRate: 9600
+        baudRate: 9600,
+    });
+
+    const BME = await bme280.open({
+        i2cAddress: 0x76,
     });
 
     PMS.on('error', (e) => {
@@ -91,6 +100,7 @@ async function main() {
 
         const Metrics = {};
 
+        // Data from PMS
         CustomMetrics.forEach((metric) => {
             Metrics[metric] = 0;
         });
@@ -108,6 +118,13 @@ async function main() {
             Metrics[metric] = Math.round(Metrics[metric])
         });
 
+        // Data from BME
+        const tph = await readBME(BME);
+
+        Metrics['CustomMetrics|Temperature'] = Math.round(tph.temperature);
+        Metrics['CustomMetrics|Pressure'] = Math.round(tph.pressure);
+        Metrics['CustomMetrics|Humidity'] = Math.round(tph.humidity);
+
         // Reset
         combinedData = [];
 
@@ -118,11 +135,11 @@ async function main() {
 
         const UnixTimeStamp = Math.round((new Date()).getTime() / 1000);
 
-        CustomMetrics.forEach((metric) => {
+        Object.keys(Metrics).forEach((m) => {
             vROpsMetrics["property-content"].push({
-                "statKey": metric,
+                "statKey": m,
                 "timestamps": [UnixTimeStamp],
-                "values": [Metrics[metric]],
+                "values": [Metrics[m]],
                 "others": [],
                 "otherAttributes": {}
             });
